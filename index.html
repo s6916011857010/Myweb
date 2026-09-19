@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบเว็บส่วนบุคคล รายงานผลงานและประวัติทางวิชาการ</title>
+  
+  <!-- Google Font: Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sarabun', 'sans-serif'],
+          },
+          colors: {
+            pastel: {
+              main: '#3BB489',      /* สีหลัก พาสเทล */
+              leaf: '#76C58C',      /* สีหลัก พาสเทล */
+              teal: '#26A69A',
+              lightGreen: '#AED581',
+              amber: '#FFCA28',
+              coral: '#FF8A65',
+              pastelRed: '#EF5350',
+              purple: '#4A2C6D',
+              crimson: '#D32F2F',
+              orange: '#F57C00',
+              yellow: '#FBC02D',
+              sky: '#0288D1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/custom.css">
+</head>
+<body class="bg-[#F8FAF9] text-gray-800 antialiased selection:bg-[#3BB489] selection:text-white pb-20 md:pb-0 relative min-h-screen">
+
+  <!-- =====================================================================
+       1. SPLASH SCREEN & BACKGROUND DECORATION (เข้าเว็บครั้งแรก & รีเฟรชจอ)
+       ===================================================================== -->
+  <div id="splash-screen">
+    <!-- Animated Background Decoration Floating Orbs -->
+    <div class="bg-decor-blob blob-splash-1"></div>
+    <div class="bg-decor-blob blob-splash-2"></div>
+    <div class="bg-decor-blob blob-splash-3"></div>
+
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-6 max-w-md w-full">
+      <!-- Profile Picture with Glowing Ring -->
+      <div class="splash-avatar-wrapper mb-5">
+        <img src="profile.jpg" alt="รูปประจำตัว" class="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-white shadow-inner">
+      </div>
+
+      <!-- Badges Header in Splash -->
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full badge-mint">
+          <i class="fas fa-user-graduate mr-1"></i> พอร์ตโฟลิโอส่วนบุคคล
+        </span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full badge-purple">
+          <i class="fas fa-flask mr-1"></i> งานวิจัย & วิชาการ
+        </span>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight mb-2">
+        ระบบรายงานผลงานบุคคล
+      </h1>
+      <p class="text-sm md:text-base text-gray-600 mb-6">
+        มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ
+      </p>
+
+      <!-- Loading Bar & Percent -->
+      <div class="w-full bg-white/70 backdrop-blur-md rounded-full h-3.5 mb-3 p-0.5 border border-emerald-200/80 shadow-inner overflow-hidden">
+        <div id="splash-progress" class="bg-gradient-to-r from-[#3BB489] via-[#76C58C] to-[#AED581] h-full rounded-full transition-all duration-150 w-0"></div>
+      </div>
+
+      <div class="flex items-center justify-between w-full text-xs text-gray-500 font-medium px-1 mb-6">
+        <span id="splash-status" class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-[#3BB489] animate-pulse"></span>
+          กำลังเตรียมความพร้อมของระบบ...
+        </span>
+        <span id="splash-percent" class="font-bold text-[#3BB489] font-mono">0%</span>
+      </div>
+
+      <!-- Skip & Play Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
+        <button id="btn-skip-splash" class="text-xs text-gray-500 hover:text-[#3BB489] px-4 py-2 rounded-full border border-gray-300 hover:border-[#3BB489] bg-white/50 backdrop-blur transition-all duration-200">
+          <i class="fas fa-forward mr-1"></i> ข้ามหน้าจอเริ่มต้น (Skip)
+        </button>
+        <button onclick="togglePlayBgm(); hideSplashScreen();" class="text-xs text-emerald-800 hover:text-emerald-950 px-4 py-2 rounded-full border border-emerald-300 bg-emerald-100/80 hover:bg-emerald-200/80 backdrop-blur transition-all duration-200 flex items-center gap-1.5 shadow-sm font-semibold">
+          <i class="fas fa-music text-[#3BB489]"></i> เปิดเพลง & เข้าสู่เว็บไซต์ (เริ่มที่ 20s)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       GLOBAL ACTION LOADING OVERLAY (Loading Spin ทุกกระบวนการทำงาน)
+       ===================================================================== -->
+  <div id="global-action-loader">
+    <div class="bg-white/95 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-emerald-100/80 flex flex-col items-center gap-4 text-center max-w-xs mx-4">
+      <div class="loading-spinner"></div>
+      <div>
+        <h4 class="font-bold text-gray-900 text-sm mb-1">ระบบกำลังประมวลผล</h4>
+        <p id="global-loader-text" class="text-xs text-gray-500 font-medium">กรุณารอสักครู่...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       DESKTOP & TABLET STICKY NAVIGATION BAR
+       ===================================================================== -->
+  <header class="sticky top-0 z-40 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
+      <!-- Brand & Profile Thumbnail -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchSection('hero', this)">
+        <div class="relative">
+          <img src="profile.jpg" alt="รูปโปรไฟล์" class="w-10 h-10 rounded-full object-cover border-2 border-[#3BB489] shadow-sm">
+          <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 leading-tight text-sm sm:text-base flex items-center gap-2">
+            รายงานผลงานบุคคล
+            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded-full badge-mint font-medium">Academic Portfolio</span>
+          </div>
+          <div class="text-xs text-gray-500 hidden sm:block">
+            พระจอมเกล้าพระนครเหนือ (KMUTNB)
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Menu Links -->
+      <nav class="hidden md:flex items-center gap-1.5 lg:gap-2">
+        <button onclick="switchSection('hero', this)" class="nav-link-item px-3.5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/70 transition-all flex items-center gap-1.5 active-nav" data-nav-target="hero">
+          <i class="fas fa-home text-xs text-[#3BB489]"></i> หน้าหลัก
+        </button>
+        <button onclick="switchSection('education', this)" class="nav-link-item px-3.5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/70 transition-all flex items-center gap-1.5" data-nav-target="education">
+          <i class="fas fa-graduation-cap text-xs text-[#26A69A]"></i> ประวัติการศึกษา
+        </button>
+        <button onclick="switchSection('research', this)" class="nav-link-item px-3.5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/70 transition-all flex items-center gap-1.5" data-nav-target="research">
+          <i class="fas fa-book-journal-whills text-xs text-[#4A2C6D]"></i> ผลงานวิจัย (WEKA ML)
+        </button>
+        <button onclick="switchSection('contact', this)" class="nav-link-item px-3.5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-emerald-700 hover:bg-emerald-50/70 transition-all flex items-center gap-1.5" data-nav-target="contact">
+          <i class="fas fa-map-marker-alt text-xs text-[#EF5350]"></i> สถานที่ติดต่อ
+        </button>
+      </nav>
+
+      <!-- Action Utilities -->
+      <div class="flex items-center gap-2">
+        <!-- Quick Music Play / Pause (20s+) -->
+        <button id="header-music-btn" onclick="togglePlayBgm()" title="เล่น/หยุดเพลงประกอบ (เริ่มจาก 20 วิ)" class="px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 text-emerald-800 text-xs font-medium hover:bg-emerald-100/80 transition-all flex items-center gap-1.5 shadow-sm">
+          <i class="fas fa-music text-[#3BB489]"></i>
+          <span class="music-play-icon fas fa-play text-[10px]"></span>
+          <span class="hidden sm:inline font-semibold">เพลง (20s+)</span>
+        </button>
+        <button onclick="replaySplashScreen()" title="ทดสอบดู Splash Screen อีกครั้ง" class="px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50/60 text-emerald-800 text-xs font-medium hover:bg-emerald-100/70 transition-all flex items-center gap-1.5 shadow-sm">
+          <i class="fas fa-rotate-right text-[#3BB489]"></i>
+          <span class="hidden sm:inline">ทดสอบ Splash Screen</span>
+        </button>
+        <a href="#contact" class="hidden sm:flex gradient-pastel-btn px-4 py-2 rounded-xl text-xs font-semibold items-center gap-1.5">
+          <i class="fas fa-paper-plane"></i> ติดต่อสอบถาม
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN HERO SECTION (ภาพรวมบุคคล & Background Decoration)
+       ===================================================================== -->
+  <section id="hero" class="relative overflow-hidden pt-8 pb-14 md:pt-14 md:pb-20">
+    <!-- Ambient Background Blobs -->
+    <div class="bg-decor-blob blob-1"></div>
+    <div class="bg-decor-blob blob-2"></div>
+    <div class="bg-decor-blob blob-3"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        <!-- Profile Image Column (ตามรูปแนบของผู้ใช้) -->
+        <div class="lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left">
+          <div class="relative group">
+            <!-- Decorative pastel ring -->
+            <div class="absolute -inset-1.5 bg-gradient-to-r from-[#3BB489] via-[#AED581] to-[#26A69A] rounded-3xl blur-lg opacity-40 group-hover:opacity-60 transition duration-700"></div>
+            
+            <div class="relative bg-white p-3 rounded-3xl shadow-xl border border-emerald-100">
+              <img src="profile.jpg" alt="ภาพประจำตัวผู้จัดทำ" class="w-64 h-80 sm:w-72 sm:h-92 md:w-80 md:h-[400px] object-cover rounded-2xl shadow-inner">
+              
+              <!-- Floating Badge 1: KMUTNB Student/Researcher -->
+              <div class="absolute -bottom-4 -right-4 glass-card px-3.5 py-2 rounded-2xl shadow-lg border border-emerald-100 flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#3BB489] to-[#76C58C] flex items-center justify-center text-white shadow-sm">
+                  <i class="fas fa-microchip text-sm"></i>
+                </div>
+                <div class="text-left">
+                  <div class="text-[11px] text-gray-500 font-medium">สายงานเชี่ยวชาญ</div>
+                  <div class="text-xs font-bold text-gray-800">Machine Learning & Data</div>
+                </div>
+              </div>
+
+              <!-- Floating Badge 2: Research Published -->
+              <div class="absolute -top-3 -left-3 glass-card px-3 py-1.5 rounded-xl shadow-md border border-amber-100 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FFCA28] animate-ping"></span>
+                <span class="text-xs font-bold text-[#8C6200]">
+                  <i class="fas fa-award mr-1"></i> วารสารมหาวิทยาลัย
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Content Column -->
+        <div class="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+          
+          <!-- Category Badges -->
+          <div class="flex flex-wrap gap-2 justify-center lg:justify-start mb-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold badge-mint flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-check-circle text-[#3BB489]"></i> ยืนยันข้อมูลทางวิชาการ
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold badge-purple flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-school text-[#4A2C6D]"></i> 3 สถาบันการศึกษา
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold badge-coral flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-brain text-[#FF8A65]"></i> WEKA Machine Learning
+            </span>
+          </div>
+
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-3">
+            ผลงานบทความวิจัย - ผลงานทางวิชาการ
+          </h2>
+          <div class="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#3BB489] via-[#26A69A] to-[#4A2C6D] bg-clip-text text-transparent mb-4 leading-snug">
+            การศึกษาวิจัยเชิงลึกและการทดลองประเมินผลการพยากรณ์ราคาด้วยเครื่องมือเหมืองข้อมูล WEKA
+          </div>
+
+          <p class="text-gray-600 text-base sm:text-lg leading-relaxed mb-6 max-w-2xl font-light">
+            ระบบแฟ้มสะสมผลงานและรายงานทางวิชาการ รวบรวมประวัติการศึกษาตั้งแต่ปฐมวัยจนถึงระดับอุดมศึกษา ณ 
+            <strong class="text-gray-800 font-semibold">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</strong> 
+            พร้อมการเผยแพร่งานวิจัยการพยากรณ์ราคาด้วยการเรียนรู้ของเครื่องจักรผ่านโปรแกรม WEKA
+          </p>
+
+          <!-- Key Quick Metrics / Badges -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 w-full max-w-lg mb-8">
+            <div class="glass-card p-3.5 rounded-2xl text-center border-l-4 border-l-[#3BB489]">
+              <div class="text-2xl font-black text-[#3BB489]">3</div>
+              <div class="text-xs text-gray-500 font-medium">สถาบันการศึกษา</div>
+            </div>
+            <div class="glass-card p-3.5 rounded-2xl text-center border-l-4 border-l-[#26A69A]">
+              <div class="text-2xl font-black text-[#26A69A]">94.2%</div>
+              <div class="text-xs text-gray-500 font-medium">ความแม่นยำ WEKA ML</div>
+            </div>
+            <div class="glass-card p-3.5 rounded-2xl text-center border-l-4 border-l-[#FF8A65] col-span-2 sm:col-span-1">
+              <div class="text-2xl font-black text-[#FF8A65]">TCI</div>
+              <div class="text-xs text-gray-500 font-medium">วารสารมหาวิทยาลัย</div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex flex-wrap gap-3.5 justify-center lg:justify-start">
+            <button onclick="switchSection('research', this)" class="gradient-pastel-btn px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg">
+              <i class="fas fa-chart-line"></i> ดูผลงานวิจัย & กราฟ WEKA
+            </button>
+            <button onclick="switchSection('education', this)" class="bg-white hover:bg-emerald-50 text-gray-800 border border-gray-200 px-5 py-3 rounded-2xl font-semibold text-sm flex items-center gap-2 shadow-sm transition-all">
+              <i class="fas fa-graduation-cap text-[#3BB489]"></i> ดูประวัติการศึกษา
+            </button>
+            <button onclick="copyAddress(this)" class="bg-white hover:bg-slate-50 text-gray-700 border border-gray-200 px-4 py-3 rounded-2xl font-medium text-xs flex items-center gap-2 shadow-sm transition-all" title="คัดลอกที่อยู่ติดต่อ">
+              <i class="fas fa-copy text-[#FFCA28]"></i> คัดลอกที่อยู่ (บางซื่อ)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SECTION 1: ประวัติการศึกษา (EDUCATION HISTORY)
+       - โรงเรียนอนุบาลสามเสน
+       - โรงเรียนโยธินบูรณะ
+       - มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ
+       ===================================================================== -->
+  <section id="education" class="py-14 md:py-20 relative bg-white/70 border-t border-b border-emerald-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header with Badges -->
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-mint text-xs font-semibold mb-3">
+          <i class="fas fa-graduation-cap text-[#3BB489]"></i> ลำดับขั้นการศึกษา (Academic Background)
+        </div>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+          1. ประวัติการศึกษา
+        </h2>
+        <p class="mt-2 text-sm sm:text-base text-gray-500">
+          เส้นทางการเรียนรู้และเสริมสร้างทักษะทางวิชาการอย่างต่อเนื่องจาก 3 สถาบันการศึกษาชั้นนำ
+        </p>
+      </div>
+
+      <!-- Education Timeline UI -->
+      <div class="relative">
+        <!-- Vertical connecting line -->
+        <div class="hidden md:block absolute left-1/2 -ml-0.5 top-8 bottom-8 w-1 bg-gradient-to-b from-[#3BB489] via-[#26A69A] to-[#4A2C6D] rounded-full opacity-30"></div>
+
+        <div class="space-y-8 md:space-y-12">
+          
+          <!-- Institution 1: โรงเรียนอนุบาลสามเสน -->
+          <div class="relative flex flex-col md:flex-row items-center timeline-card">
+            <!-- Left Side / Content -->
+            <div class="w-full md:w-1/2 md:pr-10 text-left md:text-right">
+              <div class="glass-card p-6 rounded-3xl border border-emerald-100/80 transition-all duration-300">
+                <div class="flex items-center md:justify-end gap-2 mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold badge-amber">
+                    <i class="fas fa-seedling mr-1"></i> ปฐมวัย - ประถมศึกษา
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-mono">
+                    พญาไท กทม.
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">
+                  โรงเรียนอนุบาลสามเสน
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">
+                  Anuban Samsen School
+                </p>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                  จุดเริ่มต้นของการบ่มเพาะระเบียบวินัย ความคิดสร้างสรรค์ ทักษะการเรียนรู้ขั้นพื้นฐาน และทัศนคติเชิงบวกต่อการศึกษา
+                </p>
+                <!-- Badges -->
+                <div class="mt-4 flex flex-wrap gap-1.5 md:justify-end">
+                  <span class="px-2 py-0.5 text-[11px] rounded-md badge-lime">พื้นฐานภาษาและการคิด</span>
+                  <span class="px-2 py-0.5 text-[11px] rounded-md badge-yellow">กิจกรรมเสริมทักษะ</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Center Timeline Node Icon -->
+            <div class="my-4 md:my-0 md:absolute md:left-1/2 md:-ml-7 flex items-center justify-center z-20">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#AED581] to-[#FFCA28] p-1 shadow-lg timeline-dot flex items-center justify-center text-white">
+                <div class="w-full h-full bg-white rounded-xl flex items-center justify-center text-[#8C6200]">
+                  <i class="fas fa-child text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side Blank for balance on desktop -->
+            <div class="hidden md:block md:w-1/2 md:pl-10"></div>
+          </div>
+
+          <!-- Institution 2: โรงเรียนโยธินบูรณะ -->
+          <div class="relative flex flex-col md:flex-row items-center timeline-card">
+            <!-- Left Side Blank for balance on desktop -->
+            <div class="hidden md:block md:w-1/2 md:pr-10"></div>
+
+            <!-- Center Timeline Node Icon -->
+            <div class="my-4 md:my-0 md:absolute md:left-1/2 md:-ml-7 flex items-center justify-center z-20">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#26A69A] to-[#0288D1] p-1 shadow-lg timeline-dot flex items-center justify-center text-white">
+                <div class="w-full h-full bg-white rounded-xl flex items-center justify-center text-[#11685F]">
+                  <i class="fas fa-book-reader text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side Content -->
+            <div class="w-full md:w-1/2 md:pl-10 text-left">
+              <div class="glass-card p-6 rounded-3xl border border-teal-100/80 transition-all duration-300">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold badge-teal">
+                    <i class="fas fa-user-tie mr-1"></i> มัธยมศึกษา
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-mono">
+                    บางซื่อ กทม.
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">
+                  โรงเรียนโยธินบูรณะ
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">
+                  Yothinburana School
+                </p>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                  สถาบันมัธยมศึกษาชั้นนำ เสริมสร้างองค์ความรู้ทางวิทยาศาสตร์-คณิตศาสตร์ เทคโนโลยีสารสนเทศ และเตรียมความพร้อมสู่การวิจัยระดับมหาวิทยาลัย
+                </p>
+                <!-- Badges -->
+                <div class="mt-4 flex flex-wrap gap-1.5">
+                  <span class="px-2 py-0.5 text-[11px] rounded-md badge-teal">ทักษะการคำนวณและสถิติ</span>
+                  <span class="px-2 py-0.5 text-[11px] rounded-md badge-blue">โครงงานวิทยาศาสตร์</span>
+                  <span class="px-2 py-0.5 text-[11px] rounded-md badge-mint">เกียรติประวัติวิชาการ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Institution 3: มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ -->
+          <div class="relative flex flex-col md:flex-row items-center timeline-card">
+            <!-- Left Side / Content -->
+            <div class="w-full md:w-1/2 md:pr-10 text-left md:text-right">
+              <div class="glass-card p-6 rounded-3xl border-2 border-[#3BB489]/50 shadow-xl transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#3BB489]/20 to-transparent rounded-bl-full pointer-events-none"></div>
+
+                <div class="flex items-center md:justify-end gap-2 mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold badge-purple">
+                    <i class="fas fa-award mr-1"></i> อุดมศึกษา (ปัจจุบัน)
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold badge-mint">
+                    <i class="fas fa-check-double mr-1"></i> ตีพิมพ์บทความวิจัย
+                  </span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ
+                </h3>
+                <p class="text-sm font-medium text-emerald-700 mb-3">
+                  King Mongkut's University of Technology North Bangkok (KMUTNB)
+                </p>
+                <p class="text-xs text-gray-600 leading-relaxed mb-4">
+                  ศึกษาวิจัยและเชี่ยวชาญด้านวิทยาการคอมพิวเตอร์และปัญญาประดิษฐ์ ตีพิมพ์ผลงานวิจัยการพยากรณ์ราคาด้วยอัลกอริทึม Machine Learning ผ่านโปรแกรม WEKA ลงวารสารมหาวิทยาลัย
+                </p>
+                <!-- Badges -->
+                <div class="flex flex-wrap gap-1.5 md:justify-end">
+                  <span class="px-2.5 py-1 text-xs rounded-lg badge-mint font-semibold">Data Mining</span>
+                  <span class="px-2.5 py-1 text-xs rounded-lg badge-purple font-semibold">Machine Learning</span>
+                  <span class="px-2.5 py-1 text-xs rounded-lg badge-coral font-semibold">WEKA Tool</span>
+                  <span class="px-2.5 py-1 text-xs rounded-lg badge-leaf font-semibold">University Journal Publication</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Center Timeline Node Icon -->
+            <div class="my-4 md:my-0 md:absolute md:left-1/2 md:-ml-7 flex items-center justify-center z-20">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#3BB489] via-[#26A69A] to-[#4A2C6D] p-1 shadow-xl timeline-dot flex items-center justify-center text-white">
+                <div class="w-full h-full bg-white rounded-xl flex items-center justify-center text-[#4A2C6D]">
+                  <i class="fas fa-university text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side Blank for balance on desktop -->
+            <div class="hidden md:block md:w-1/2 md:pl-10"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SECTION 2: ผลงานบทความวิจัย - ผลงานทางวิชาการ
+       - ตีพิมพ์ลงวารสารมหาวิทยาลัย [การพยากรณ์ราคาด้วยการเรียนรู้ของเครื่องจักรด้วยโปรแกรมเวก้า]
+       - <div> <canvas> </canvas> </div> (Chart.js Visualization)
+       - table overflow (ตารางเปรียบเทียบประสิทธิภาพอัลกอริทึมใน WEKA)
+       ===================================================================== -->
+  <section id="research" class="py-14 md:py-20 relative bg-[#F4F9F6]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-purple text-xs font-semibold mb-3">
+          <i class="fas fa-microscope text-[#4A2C6D]"></i> งานวิจัยที่ได้รับการตีพิมพ์เผยแพร่
+        </div>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+          3. ผลงานบทความวิจัย - ผลงานทางวิชาการ
+        </h2>
+        <p class="mt-2 text-sm sm:text-base text-gray-600">
+          การศึกษาวิจัยเชิงลึกและการทดลองประเมินผลการพยากรณ์ราคาด้วยเครื่องมือเหมืองข้อมูล WEKA
+        </p>
+      </div>
+
+      <!-- Featured Paper Spotlight Card -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 mb-12 border-2 border-emerald-200/90 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row gap-8 items-start justify-between">
+          
+          <div class="flex-1">
+            <!-- Badges Bar -->
+            <div class="flex flex-wrap gap-2 items-center mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-bold badge-mint">
+                <i class="fas fa-check-circle mr-1"></i> ตีพิมพ์ลงวารสารมหาวิทยาลัย
+              </span>
+              <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold badge-purple">
+                <i class="fas fa-book mr-1"></i> Peer-Reviewed Journal
+              </span>
+              <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold badge-amber">
+                <i class="fas fa-chart-line mr-1"></i> WEKA Data Mining
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-xs bg-slate-200 text-slate-700 font-mono">
+                Cross-Validation: 10-Fold
+              </span>
+            </div>
+
+            <!-- Paper Title -->
+            <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug mb-3">
+              การพยากรณ์ราคาด้วยการเรียนรู้ของเครื่องจักรด้วยโปรแกรมเวก้า
+            </h3>
+            <div class="text-xs sm:text-sm text-gray-500 font-medium mb-4">
+              <span class="text-emerald-700 font-semibold">ตีพิมพ์ใน:</span> วารสารมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ | หมวดหมู่วิทยาการคอมพิวเตอร์และปัญญาประดิษฐ์
+            </div>
+
+            <!-- Abstract Snippet -->
+            <p class="text-gray-700 text-sm leading-relaxed mb-6 font-normal">
+              บทความวิจัยนี้นำเสนอระเบียบวิธีการประยุกต์ใช้อัลกอริทึมการเรียนรู้ของเครื่องจักร (Machine Learning Algorithms) 
+              บนโปรแกรม <strong class="text-emerald-800">Waikato Environment for Knowledge Analysis (WEKA)</strong> 
+              เพื่อวิเคราะห์และพยากรณ์แนวโน้มราคา จากการทดลองเปรียบเทียบโมเดลต่างๆ เช่น Random Forest, Support Vector Machines (SMO), 
+              Multilayer Perceptron และ Linear Regression พบว่าอัลกอริทึม 
+              <strong class="text-[#1E6B50] bg-emerald-50 px-2 py-0.5 rounded">Random Forest</strong> 
+              ให้ค่าความถูกต้องสูงสุดถึง <span class="font-bold text-[#3BB489]">94.2%</span> 
+              และมีค่าความคลาดเคลื่อนสมบูรณ์เฉลี่ย (MAE) ต่ำที่สุดเพียง 0.118
+            </p>
+
+            <!-- Action Buttons for Research -->
+            <div class="flex flex-wrap gap-3">
+              <button onclick="openResearchModal(this)" class="gradient-pastel-btn px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md">
+                <i class="fas fa-file-alt"></i> อ่านบทคัดย่อและวิธีวิจัยฉบับเต็ม
+              </button>
+              <button onclick="copyCitation(this)" class="bg-white hover:bg-slate-50 text-gray-700 border border-gray-200 px-4 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition-all">
+                <i class="fas fa-quote-right text-[#4A2C6D]"></i> คัดลอกรายการอ้างอิง (Citation)
+              </button>
+              <button onclick="downloadResearchSummary(this)" class="bg-white hover:bg-slate-50 text-gray-700 border border-gray-200 px-4 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition-all">
+                <i class="fas fa-file-pdf text-[#EF5350]"></i> ดาวน์โหลดสรุป PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Highlight Metric Card on the right -->
+          <div class="w-full lg:w-72 bg-gradient-to-br from-white to-emerald-50/70 p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col gap-4">
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center justify-between">
+              <span>ผลลัพธ์การทดลองเด่น</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            </div>
+
+            <div class="border-b border-emerald-100 pb-3">
+              <div class="text-xs text-gray-500">อัลกอริทึมที่มีประสิทธิภาพสูงสุด</div>
+              <div class="text-lg font-bold text-emerald-800">Random Forest</div>
+              <span class="text-[11px] font-mono text-gray-500">weka.classifiers.trees</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 border-b border-emerald-100 pb-3">
+              <div>
+                <div class="text-[11px] text-gray-500">Correlation / Accuracy</div>
+                <div class="text-xl font-extrabold text-[#3BB489]">94.2%</div>
+              </div>
+              <div>
+                <div class="text-[11px] text-gray-500">Mean Abs Error (MAE)</div>
+                <div class="text-xl font-extrabold text-gray-800">0.118</div>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-gray-600 flex items-center gap-1.5">
+              <i class="fas fa-laptop-code text-[#26A69A]"></i>
+              ทดสอบบนโปรแกรม WEKA 3.8.6
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           CHART VISUALIZATION INSIDE <div> <canvas> </canvas> </div>
+           ===================================================================== -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 mb-12 border border-emerald-100/90 shadow-lg">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded text-xs font-semibold badge-mint">
+                <i class="fas fa-chart-bar mr-1"></i> Data Visualization
+              </span>
+              <span class="text-xs text-gray-500 font-mono">Chart.js Engine</span>
+            </div>
+            <h4 class="text-lg sm:text-xl font-bold text-gray-900">
+              การเปรียบเทียบประสิทธิภาพโมเดล Machine Learning ในโปรแกรม WEKA
+            </h4>
+          </div>
+
+          <!-- Chart Mode Switcher Buttons with Loading Spin -->
+          <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <button onclick="switchChartMode('accuracy', this)" class="chart-toggle-btn active bg-pastel-main text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm">
+              <i class="fas fa-percentage mr-1"></i> ความแม่นยำ (%)
+            </button>
+            <button onclick="switchChartMode('error', this)" class="chart-toggle-btn bg-white text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:text-emerald-700">
+              <i class="fas fa-wave-square mr-1"></i> ค่าความคลาดเคลื่อน (MAE/RMSE)
+            </button>
+            <button onclick="switchChartMode('radar', this)" class="chart-toggle-btn bg-white text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:text-emerald-700">
+              <i class="fas fa-chart-pie mr-1"></i> เรดาร์มิติรวม (Radar)
+            </button>
+          </div>
+        </div>
+
+        <!-- <div> <canvas> </canvas> </div> Container ตามข้อกำหนดอย่างชัดเจน -->
+        <div class="w-full relative h-72 sm:h-96 md:h-[420px] bg-white rounded-2xl p-4 border border-gray-100 shadow-inner">
+          <canvas id="wekaChart"></canvas>
+        </div>
+
+        <!-- Chart Explanation Note -->
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 pt-2 border-t border-gray-100">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-info-circle text-[#3BB489]"></i>
+            <span>ข้อมูลได้จากการทดลองแบบ 10-Fold Cross-Validation บนชุดข้อมูลทดสอบราคาในโปรแกรม WEKA</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#3BB489]"></span> สีหลักพาสเทล (#3BB489)
+            </span>
+            <span class="inline-flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#26A69A]"></span> สีเสริม (#26A69A)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           TABLE OVERFLOW (ตารางเปรียบเทียบพร้อม Scroll เลื่อนแนวนอนบนมือถือ)
+           ===================================================================== -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-lg">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded text-xs font-semibold badge-coral">
+                <i class="fas fa-table mr-1"></i> Table Overflow
+              </span>
+              <span class="text-xs text-gray-500">รองรับการเลื่อนแนวนอนบนหน้าจอมือถือ</span>
+            </div>
+            <h4 class="text-lg sm:text-xl font-bold text-gray-900">
+              ตารางบันทึกผลการทดลองอัลกอริทึมการเรียนรู้ของเครื่องในโปรแกรม WEKA
+            </h4>
+          </div>
+
+          <!-- Search & Filter Controls with Loading Spin -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Search input -->
+            <div class="relative">
+              <i class="fas fa-search absolute left-3 top-2.5 text-xs text-gray-400"></i>
+              <input type="text" oninput="searchWekaTable(event)" placeholder="ค้นหาอัลกอริทึม..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#3BB489] w-40 sm:w-48 shadow-sm">
+            </div>
+
+            <!-- Filter Categories -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <button onclick="filterWekaTable('all', this)" class="table-filter-btn active px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-medium">ทั้งหมด</button>
+              <button onclick="filterWekaTable('Tree-based', this)" class="table-filter-btn px-2.5 py-1 rounded-lg bg-white text-gray-600 font-medium">Tree-based</button>
+              <button onclick="filterWekaTable('Kernel/Neural', this)" class="table-filter-btn px-2.5 py-1 rounded-lg bg-white text-gray-600 font-medium">Neural/Kernel</button>
+              <button onclick="filterWekaTable('Statistical', this)" class="table-filter-btn px-2.5 py-1 rounded-lg bg-white text-gray-600 font-medium">Statistical</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Responsive Table with Overflow Container -->
+        <div class="table-overflow-container bg-white border border-gray-100">
+          <table>
+            <thead>
+              <tr>
+                <th>อัลกอริทึม (Algorithm Name)</th>
+                <th>สถานะประสิทธิภาพ</th>
+                <th>หมวดหมู่ใน WEKA</th>
+                <th>ความถูกต้อง (%)</th>
+                <th>MAE (Mean Abs Error)</th>
+                <th>RMSE (Root Mean Sq)</th>
+                <th>เวลาประมวลผล</th>
+              </tr>
+            </thead>
+            <tbody id="weka-table-body">
+              <!-- Dynamically populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-2">
+          <div class="flex items-center gap-1.5">
+            <i class="fas fa-arrows-left-right text-gray-400"></i>
+            <span>บนหน้าจอมือถือ สามารถใช้นิ้วปัดเลื่อนตารางไปทางซ้าย-ขวาได้แบบ Table Overflow</span>
+          </div>
+          <span class="font-mono text-[11px] text-gray-400">Environment: WEKA Knowledge Flow & Explorer GUI</span>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SECTION 3: สถานที่ติดต่อ (CONTACT INFORMATION)
+       - ประชาราษฎร์สาย 1 บางซื่อ กทม 10800
+       - ระบบฟอร์มติดต่อ, การ์ดแผนที่, ปุ่มคัดลอกที่อยู่พร้อม Loading Spin
+       ===================================================================== -->
+  <section id="contact" class="py-14 md:py-20 relative bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-coral text-xs font-semibold mb-3">
+          <i class="fas fa-address-card text-[#EF5350]"></i> ข้อมูลการติดต่อ (Contact Details)
+        </div>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+          2. สถานที่ติดต่อ
+        </h2>
+        <p class="mt-2 text-sm sm:text-base text-gray-500">
+          พร้อมเปิดรับการติดต่อ ประสานงานทางวิชาการ แลกเปลี่ยนองค์ความรู้ และความร่วมมือด้านงานวิจัย
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Contact Address & Card (Left Column) -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <!-- Primary Location Card (ประชาราษฎร์สาย 1 บางซื่อ กทม 10800) -->
+          <div class="glass-card p-6 sm:p-8 rounded-3xl border-2 border-emerald-100 shadow-xl relative overflow-hidden">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#3BB489] to-[#26A69A] flex items-center justify-center text-white text-xl shadow-md flex-shrink-0">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold badge-mint">สถานที่ติดต่อหลัก</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold badge-blue">เขตบางซื่อ</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mt-1 mb-2">
+                  ที่อยู่สำหรับการติดต่อ
+                </h3>
+                <div class="text-base sm:text-lg font-semibold text-emerald-800 bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200/80 mb-4 leading-relaxed">
+                  <i class="fas fa-location-dot mr-1.5 text-[#3BB489]"></i>
+                  ประชาราษฎร์สาย 1 บางซื่อ กทม 10800
+                </div>
+
+                <div class="flex flex-wrap gap-2.5">
+                  <button onclick="copyAddress(this)" class="gradient-pastel-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-copy"></i> คัดลอกที่อยู่
+                  </button>
+                  <button onclick="openGoogleMap()" class="bg-white hover:bg-slate-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all">
+                    <i class="fas fa-external-link-alt text-[#0288D1]"></i> เปิดใน Google Maps
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulated Interactive Map Card -->
+          <div class="glass-card p-5 rounded-3xl border border-gray-200 shadow-md">
+            <div class="flex items-center justify-between mb-3 text-xs">
+              <span class="font-bold text-gray-700 flex items-center gap-1.5">
+                <i class="fas fa-map text-[#3BB489]"></i> แผนที่จำลองบริเวณบางซื่อ (Bang Sue, Bangkok)
+              </span>
+              <span class="px-2 py-0.5 rounded badge-leaf font-mono text-[11px]">Postal: 10800</span>
+            </div>
+
+            <!-- Map View Box -->
+            <div class="relative w-full h-48 sm:h-56 bg-gradient-to-br from-emerald-100 via-teal-50 to-blue-50 rounded-2xl border border-emerald-200 overflow-hidden flex flex-col items-center justify-center text-center p-4">
+              <!-- Map Grid lines simulation -->
+              <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#3BB489_1px,transparent_1px)] [background-size:16px_16px]"></div>
+              
+              <!-- Location Marker Pin -->
+              <div class="relative z-10 animate-bounce">
+                <div class="w-12 h-12 rounded-full bg-[#EF5350] text-white flex items-center justify-center text-xl shadow-2xl border-4 border-white">
+                  <i class="fas fa-map-pin"></i>
+                </div>
+              </div>
+
+              <div class="relative z-10 mt-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow border border-emerald-100 max-w-xs">
+                <div class="font-bold text-gray-900 text-xs sm:text-sm">ถนนประชาราษฎร์สาย 1</div>
+                <div class="text-[11px] text-gray-500">แขวงบางซื่อ เขตบางซื่อ กรุงเทพมหานคร 10800</div>
+              </div>
+
+              <button onclick="openGoogleMap()" class="relative z-10 mt-2 text-[11px] text-[#0288D1] font-semibold hover:underline flex items-center gap-1">
+                คลิกเพื่อดูเส้นทางและแผนที่ดาวเทียม <i class="fas fa-arrow-right text-[9px]"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Interactive Contact Form (Right Column) -->
+        <div class="lg:col-span-6">
+          <div class="glass-card p-6 sm:p-8 rounded-3xl border border-emerald-100/90 shadow-xl">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold badge-mint">
+                <i class="fas fa-envelope-open-text mr-1"></i> แบบฟอร์มออนไลน์
+              </span>
+              <span class="text-xs text-gray-400">ตอบกลับภายใน 24 ชม.</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">
+              ส่งข้อความติดต่อสอบถาม
+            </h3>
+            <p class="text-xs text-gray-500 mb-6">
+              สามารถกรอกข้อมูลด้านล่างเพื่อติดต่อสอบถามเกี่ยวกับผลงานวิจัย การศึกษา หรือการร่วมงาน
+            </p>
+
+            <form id="contact-form" class="space-y-4">
+              <div>
+                <label for="contact-name" class="block text-xs font-bold text-gray-700 mb-1">
+                  ชื่อ - นามสกุล หรือหน่วยงาน <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-user absolute left-3.5 top-3.5 text-xs text-gray-400"></i>
+                  <input type="text" id="contact-name" required placeholder="กรุณาระบุชื่อของคุณ" class="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#3BB489] transition-all">
+                </div>
+              </div>
+
+              <div>
+                <label for="contact-email" class="block text-xs font-bold text-gray-700 mb-1">
+                  อีเมลสำหรับติดต่อกลับ <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-envelope absolute left-3.5 top-3.5 text-xs text-gray-400"></i>
+                  <input type="email" id="contact-email" required placeholder="example@email.com" class="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#3BB489] transition-all">
+                </div>
+              </div>
+
+              <div>
+                <label for="contact-topic" class="block text-xs font-bold text-gray-700 mb-1">
+                  หัวข้อเรื่องการติดต่อ
+                </label>
+                <select id="contact-topic" class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#3BB489] transition-all text-gray-700">
+                  <option value="research">สอบถามเกี่ยวกับบทความวิจัย (WEKA Machine Learning)</option>
+                  <option value="academic">ความร่วมมือทางวิชาการและโครงการ</option>
+                  <option value="general">ติดต่อสอบถามทั่วไป</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="contact-message" class="block text-xs font-bold text-gray-700 mb-1">
+                  ข้อความรายละเอียด <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="contact-message" rows="4" required placeholder="พิมพ์ข้อความที่คุณต้องการติดต่อที่นี่..." class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#3BB489] transition-all resize-none"></textarea>
+              </div>
+
+              <button type="submit" class="w-full gradient-pastel-btn py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg">
+                <i class="fas fa-paper-plane"></i> ส่งข้อความติดต่อ (พร้อม Loading Spin)
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       2. FOOTER (Fluid Width, สีพื้นหลังเทาอ่อน ตามข้อกำหนดอย่างชัดเจน)
+       footer fluid width เติมสีพื้นหลัง เทาอ่อน ระบบเว็บส่วนบุคคล พัฒนาโดย [...........................................]
+       ===================================================================== -->
+  <footer class="w-full bg-slate-100 text-gray-700 border-t border-gray-200 py-10 px-4 sm:px-6 lg:px-8 mt-12 transition-colors">
+    <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center space-y-4">
+      
+      <!-- Footer Badges & Brand -->
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold badge-mint">
+          <i class="fas fa-shield-alt mr-1"></i> ระบบเว็บส่วนบุคคล
+        </span>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold badge-purple">
+          <i class="fas fa-graduation-cap mr-1"></i> KMUTNB Academic Report
+        </span>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold badge-teal">
+          <i class="fas fa-code mr-1"></i> Tailwind CSS Modern Minimalist
+        </span>
+      </div>
+
+      <!-- ข้อความ Footer ตามที่ผู้ใช้ระบุอย่างเคร่งครัด -->
+      <div class="text-base sm:text-lg font-bold text-gray-800 tracking-wide">
+        ระบบเว็บส่วนบุคคล พัฒนาโดย [...........................................]
+      </div>
+
+      <!-- Sub details & Address footnote -->
+      <div class="text-xs text-gray-500 max-w-xl leading-relaxed">
+        สถานที่ติดต่อ: ประชาราษฎร์สาย 1 บางซื่อ กทม 10800 &bull; ฟอนต์ Sarabun Google Font &bull; ธีมสีหลักพาสเทล (#3BB489, #76C58C)
+      </div>
+
+      <div class="text-[11px] text-gray-400 pt-2 border-t border-gray-200/80 w-full max-w-md flex items-center justify-between">
+        <span>&copy; สงวนลิขสิทธิ์ระบบรายงานผลงานบุคคล</span>
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="hover:text-emerald-700 flex items-center gap-1">
+          กลับขึ้นด้านบน <i class="fas fa-arrow-up"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       MOBILE NAVIGATION BOTTOM BAR (Responsive Mobile App Experience)
+       ===================================================================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-emerald-100 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 py-2">
+    <div class="grid grid-cols-4 gap-1 text-center">
+      <button onclick="switchSection('hero', this)" class="flex flex-col items-center py-1 text-gray-600 hover:text-[#3BB489] transition-all">
+        <i class="fas fa-home text-base mb-0.5"></i>
+        <span class="text-[10px] font-medium">หน้าหลัก</span>
+      </button>
+      <button onclick="switchSection('education', this)" class="flex flex-col items-center py-1 text-gray-600 hover:text-[#26A69A] transition-all">
+        <i class="fas fa-graduation-cap text-base mb-0.5"></i>
+        <span class="text-[10px] font-medium">การศึกษา</span>
+      </button>
+      <button onclick="switchSection('research', this)" class="flex flex-col items-center py-1 text-gray-600 hover:text-[#4A2C6D] transition-all">
+        <i class="fas fa-book-open text-base mb-0.5"></i>
+        <span class="text-[10px] font-medium">งานวิจัย</span>
+      </button>
+      <button onclick="switchSection('contact', this)" class="flex flex-col items-center py-1 text-gray-600 hover:text-[#EF5350] transition-all">
+        <i class="fas fa-map-marker-alt text-base mb-0.5"></i>
+        <span class="text-[10px] font-medium">ติดต่อ</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       RESEARCH ABSTRACT DETAIL MODAL
+       ===================================================================== -->
+  <div id="research-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden max-h-[90vh] flex flex-col animate-[toastIn_0.3s_ease]">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-emerald-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#3BB489] text-white flex items-center justify-center text-sm">
+            <i class="fas fa-file-invoice"></i>
+          </span>
+          <div>
+            <h4 class="font-bold text-gray-900 text-sm sm:text-base">เอกสารสรุปบทความวิจัยฉบับย่อ</h4>
+            <div class="text-[11px] text-gray-500">ตีพิมพ์ในวารสารมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</div>
+          </div>
+        </div>
+        <button onclick="closeResearchModal()" class="w-8 h-8 rounded-full bg-white hover:bg-gray-100 text-gray-500 flex items-center justify-center shadow-sm">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto space-y-4 text-sm text-gray-700">
+        <div>
+          <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">ชื่อบทความวิจัย</div>
+          <h3 class="text-lg font-bold text-gray-900 leading-snug">
+            การพยากรณ์ราคาด้วยการเรียนรู้ของเครื่องจักรด้วยโปรแกรมเวก้า (Price Forecasting using Machine Learning with WEKA)
+          </h3>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+          <div class="text-xs font-bold text-gray-800">บทคัดย่อ (Abstract):</div>
+          <p class="text-xs text-gray-600 leading-relaxed">
+            งานวิจัยนี้มุ่งเน้นการศึกษาความสามารถในการพยากรณ์ราคาของอัลกอริทึมการเรียนรู้ของเครื่อง (Machine Learning Algorithms) 
+            ที่รันบนแพลตฟอร์ม WEKA โดยทำการเปรียบเทียบโมเดลในตระกูล Decision Trees, Support Vector Machines, Neural Networks และ Regression 
+            เพื่อค้นหาโมเดลที่มีความแม่นยำสูงสุดและมีค่าความคลาดเคลื่อนต่ำที่สุดสำหรับนำไปประยุกต์ใช้ในการตัดสินใจเชิงธุรกิจ
+          </p>
+        </div>
+
+        <div>
+          <div class="text-xs font-bold text-gray-800 mb-2">ระเบียบวิธีวิจัยและการประเมินผล (Methodology):</div>
+          <ul class="text-xs text-gray-600 space-y-1.5 list-disc pl-5">
+            <li><strong>การเตรียมข้อมูล (Data Pre-processing):</strong> การกรอง Missing values และการทำ Normalization บน WEKA</li>
+            <li><strong>การทดสอบ (Validation):</strong> 10-Fold Cross-Validation เพื่อป้องกันการเกิด Overfitting</li>
+            <li><strong>ดัชนีชี้วัด (Metrics):</strong> Correlation Coefficient (%), Mean Absolute Error (MAE), Root Mean Squared Error (RMSE)</li>
+          </ul>
+        </div>
+
+        <div class="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
+          <i class="fas fa-trophy text-amber-500 text-base flex-shrink-0"></i>
+          <span><strong>ข้อสรุปเด่น:</strong> Random Forest ให้ผลลัพธ์ดีที่สุดที่ค่า Correlation 94.2% และ MAE 0.118</span>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+        <button onclick="copyCitation(this)" class="text-xs font-semibold text-gray-700 hover:text-emerald-700 flex items-center gap-1.5">
+          <i class="fas fa-quote-left text-xs"></i> คัดลอกการอ้างอิง
+        </button>
+        <button onclick="closeResearchModal()" class="gradient-pastel-btn px-4 py-2 rounded-xl text-xs font-semibold">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       BACKGROUND AUDIO & FLOATING MUSIC PLAYER (เริ่มเล่นช่วง 20 วินาทีขึ้นไป)
+       ===================================================================== -->
+  <audio id="bgm-audio" preload="auto">
+    <source src="bgm.mp3" type="audio/mpeg">
+    <source src="uploaded_media_1789816365292.mp3" type="audio/mpeg">
+    <source src="assets/bgm.mp3" type="audio/mpeg">
+    <source src="file:///C:/Users/comfl5-Pc1/.gemini/antigravity/brain/3385f159-b1f1-4760-bd42-84fb079d7701/.user_uploaded/uploaded_media_1789816365292.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Floating Music Player Widget -->
+  <div id="floating-music-widget">
+    <!-- Minimized Floating Disc Button (เมื่อย่อขนาด) -->
+    <button id="music-mini-toggle" onclick="toggleMusicWidgetMinimize()" class="hidden w-12 h-12 rounded-full bg-white/95 backdrop-blur-md shadow-2xl border-2 border-[#3BB489] flex items-center justify-center text-emerald-600 hover:scale-110 transition-all" title="เปิดหน้าต่างเครื่องเล่นเพลง">
+      <div class="vinyl-disc w-9 h-9 border-2">
+        <i class="fas fa-music text-xs text-emerald-400"></i>
+      </div>
+    </button>
+
+    <!-- Expanded Music Control Panel -->
+    <div id="music-player-panel" class="glass-card p-3.5 sm:p-4 rounded-3xl shadow-2xl border-2 border-emerald-200/90 w-72 sm:w-80 backdrop-blur-xl">
+      <div class="flex items-center justify-between mb-2.5">
+        <div class="flex items-center gap-2.5">
+          <!-- Vinyl Disc -->
+          <div id="music-vinyl" class="vinyl-disc flex-shrink-0 cursor-pointer" onclick="togglePlayBgm()" title="แตะเพื่อเล่น/หยุด">
+            <div class="w-3 h-3 rounded-full bg-white border border-gray-300"></div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+              <span>เพลงประกอบ</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold badge-mint">เริ่มที่ 20s</span>
+            </div>
+            <div class="text-[11px] text-gray-500 font-medium">เล่นช่วง 20 วินาทีเป็นต้นไป</div>
+          </div>
+        </div>
+
+        <!-- Controls: Minimize & Soundwaves -->
+        <div class="flex items-center gap-2">
+          <div id="music-soundwave" class="soundwave-box" title="Visualizer">
+            <span class="soundwave-bar"></span>
+            <span class="soundwave-bar"></span>
+            <span class="soundwave-bar"></span>
+            <span class="soundwave-bar"></span>
+          </div>
+          <button onclick="toggleMusicWidgetMinimize()" title="ย่อหน้าต่างเพลง" class="text-gray-400 hover:text-gray-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Time & Progress Slider (เริ่มต้นที่ 20s) -->
+      <div class="space-y-1 mb-2.5">
+        <input type="range" id="music-seek-slider" min="20" max="188" step="1" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#3BB489]" title="ลากเพื่อเลื่อนช่วงเวลา (ต่ำสุด 20s)">
+        <div class="flex items-center justify-between text-[11px] font-mono text-gray-500">
+          <span id="music-current-time">00:20</span>
+          <span class="text-[10px] text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full font-semibold">ช่วง 20s+</span>
+          <span id="music-duration-time">03:08</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="flex items-center justify-between pt-2 border-t border-emerald-100/70">
+        <!-- Play / Pause -->
+        <button onclick="togglePlayBgm()" class="gradient-pastel-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+          <i class="music-play-icon fas fa-play text-[10px]"></i>
+          <span>เล่น / หยุด</span>
+        </button>
+
+        <!-- Restart from 20s -->
+        <button onclick="restartFrom20s()" title="เริ่มเล่นใหม่ที่ 20 วินาที" class="bg-white hover:bg-emerald-50 text-gray-700 border border-gray-200 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 shadow-sm transition-all">
+          <i class="fas fa-rotate-left text-[10px] text-[#3BB489]"></i> 20s
+        </button>
+
+        <!-- Volume Slider -->
+        <div class="flex items-center gap-1 text-gray-500">
+          <i id="music-vol-icon" class="fas fa-volume-up text-xs text-emerald-600"></i>
+          <input type="range" id="music-volume-slider" min="0" max="1" step="0.05" value="0.8" class="w-12 sm:w-16 h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-[#3BB489]" title="ปรับระดับเสียง">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- App Core JavaScript -->
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
